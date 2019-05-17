@@ -1,4 +1,4 @@
-#MobPush-For-APICloud
+# MobPush-For-APICloud
 /*
 Title: mobPushPlus
 Description: MobPush 在 APICloud 平台的插件
@@ -681,7 +681,7 @@ iOS系统，Android系统
 
 ### GitHub
 
-[点击此处]()
+[点击此处](https://github.com/MobClub/MobPush-For-APICloud)
 
 
 
