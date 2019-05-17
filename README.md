@@ -32,8 +32,8 @@ mobPushPlus 封装了 MobPush，是对 APICloud 平台的支持，为APICloud开
 ```
 服务电话:   400-685-2216  
 节假日值班电话:
-    iOS：185-1664-1951
-Android: 185-1664-1950
+     iOS：  185-1664-1951
+ Android:   185-1664-1950
 电子邮箱:   support@mob.com
 市场合作:   021-54623189
 ```
