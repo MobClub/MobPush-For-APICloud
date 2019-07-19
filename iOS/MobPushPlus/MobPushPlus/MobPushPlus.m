@@ -526,7 +526,7 @@ JS_METHOD(sendMessage:(UZModuleMethodContext *)context)
     
     if (resultDict.count)
     {
-        [context callbackWithRet:resultDict err:nil delete:YES];
+        [context callbackWithRet:resultDict err:nil delete:NO];
     }
 }
 
