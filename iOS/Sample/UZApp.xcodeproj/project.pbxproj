@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		2FD575282281B055004EC165 /* MobPushServiceExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2FD575232281B055004EC165 /* MobPushServiceExtension.framework */; };
 		2FD575292281B055004EC165 /* MobPush.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2FD575242281B055004EC165 /* MobPush.framework */; };
-		2FD5752A2281B055004EC165 /* MOBFoundationEx.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2FD575262281B055004EC165 /* MOBFoundationEx.framework */; };
 		2FD5752B2281B055004EC165 /* MOBFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2FD575272281B055004EC165 /* MOBFoundation.framework */; };
 		2FD575552282CB4E004EC165 /* libMobPushPlus.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2FD575542282CB4E004EC165 /* libMobPushPlus.a */; };
 		5204B61221549CD900306B1E /* libopencore-amrwb.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5204B60D21549CD900306B1E /* libopencore-amrwb.a */; };
@@ -107,7 +106,6 @@
 /* Begin PBXFileReference section */
 		2FD575232281B055004EC165 /* MobPushServiceExtension.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MobPushServiceExtension.framework; sourceTree = "<group>"; };
 		2FD575242281B055004EC165 /* MobPush.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MobPush.framework; sourceTree = "<group>"; };
-		2FD575262281B055004EC165 /* MOBFoundationEx.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MOBFoundationEx.framework; sourceTree = "<group>"; };
 		2FD575272281B055004EC165 /* MOBFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MOBFoundation.framework; sourceTree = "<group>"; };
 		2FD575542282CB4E004EC165 /* libMobPushPlus.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libMobPushPlus.a; sourceTree = "<group>"; };
 		2FD575562284045E004EC165 /* UZApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = UZApp.entitlements; sourceTree = "<group>"; };
@@ -296,7 +294,6 @@
 				52BA309B19F6367A00D81640 /* CFNetwork.framework in Frameworks */,
 				52BA309C19F6367A00D81640 /* CoreData.framework in Frameworks */,
 				52BA309D19F6367A00D81640 /* CoreGraphics.framework in Frameworks */,
-				2FD5752A2281B055004EC165 /* MOBFoundationEx.framework in Frameworks */,
 				52BA309E19F6367A00D81640 /* CoreLocation.framework in Frameworks */,
 				52BA309F19F6367A00D81640 /* CoreMedia.framework in Frameworks */,
 				52BA30A019F6367A00D81640 /* CoreTelephony.framework in Frameworks */,
@@ -340,7 +337,6 @@
 		2FD575252281B055004EC165 /* Required */ = {
 			isa = PBXGroup;
 			children = (
-				2FD575262281B055004EC165 /* MOBFoundationEx.framework */,
 				2FD575272281B055004EC165 /* MOBFoundation.framework */,
 			);
 			path = Required;
@@ -822,7 +818,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.mob.MobPush;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = MobPushDev;
+				PROVISIONING_PROFILE_SPECIFIER = oldkey_dev;
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.2;

@@ -1,0 +1,31 @@
+ <widget id="A6002582239102"  version="0.0.1">
+    <name>mobpushdemo</name>
+    <description>
+        Example For APICloud.
+    </description>
+    <author email="developer@apicloud.com" href="http://www.apicloud.com">
+        Developer
+    </author>
+    <content src="index.html" />
+    <access origin="*" />
+    <preference name="pageBounce" value="false"/>
+	<preference name="appBackground" value="rgba(0,0,0,0.0)"/>
+	<preference name="windowBackground" value="rgba(0,0,0,0.0)"/>
+	<preference name="frameBackgroundColor" value="rgba(0,0,0,0.0)"/>
+	<preference name="hScrollBarEnabled" value="false"/>
+	<preference name="vScrollBarEnabled" value="false"/>
+	<preference name="autoLaunch" value="true"/>
+	<preference name="fullScreen" value="false"/>
+	<preference name="autoUpdate" value="true" />
+	<preference name="smartUpdate" value="false" />
+	<preference name="debug" value="true"/>
+	<preference name="statusBarAppearance" value="true"/>
+	<permission name="readPhoneState" />
+	<permission name="camera" />
+	<permission name="record" />
+	<permission name="location" />
+	<permission name="fileSystem" />
+	<permission name="internet" />
+	<permission name="bootCompleted" />
+	<permission name="hardware" />  <preference name="backgroundMode" value="remote-notification"/>  <meta-data name="Mob-AppKey" value="moba6b6c6d6"/>	<meta-data name="Mob-AppSecret" value="b89d2427a3bc7ad1aea1e1e8c1d36bf3"/>	<meta-data name="com.mob.push.xiaomi.appid" value="2882303761517721670" />    <meta-data name="com.mob.push.xiaomi.appkey" value="5671772162670" />	<meta-data name="com.vivo.push.api_key" value="0afbe1b7-b850-4d45-8cee-c57cceff652e" />    <meta-data name="com.vivo.push.app_id" value="11154" />	<meta-data name="com.mob.push.oppo.appkey" value="b61Da76NM74gsG0o8C484g8GO" />    <meta-data name="com.mob.push.oppo.appsecret" value="659C583033aE8Ffe45a0e867c70746Af" />	<meta-data name="com.huawei.hms.client.appid" value="100215127" />	<meta-data name="com.mob.push.meizu.appid" value="112481" />	<meta-data name="com.mob.push.meizu.appkey" value="03dd70b9be434446a7255c8586e1725a" />   <feature name="mobPushPlus">       <param name="MOBAppKey" value="moba6b6c6d6" />       <param name="MOBAppSecret" value="b89d2427a3bc7ad1aea1e1e8c1d36bf3" />   </feature>
+</widget>

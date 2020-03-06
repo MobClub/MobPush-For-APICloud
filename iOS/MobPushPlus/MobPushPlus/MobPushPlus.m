@@ -11,6 +11,7 @@
 #import <MobPush/MobPush+Test.h>
 #import <MOBFoundation/MOBFoundation.h>
 #import "UZAppDelegate.h"
+#import <MOBFoundation/MobSDK+Privacy.h>
 
 static NSString *const mobPushModuleName = @"mobPushPlus";
 
@@ -24,8 +25,13 @@ static NSString *const mobPushModuleName = @"mobPushPlus";
 @implementation MobPushPlus
 
 #pragma mark - Override
+
+static NSMutableArray *cachedNotications;
+
 + (void)onAppLaunch:(NSDictionary *)launchOptions
 {
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didReceiveMessage:) name:MobPushDidReceiveMessageNotification object:nil];
     // 方法在应用启动时被调用
     NSDictionary *config = [[UZAppDelegate appDelegate] getFeatureByName:mobPushModuleName];
     NSString *MOBAppKey = config[@"MOBAppKey"];
@@ -36,6 +42,17 @@ static NSString *const mobPushModuleName = @"mobPushPlus";
     }
     
     [self setup];
+}
+
++ (void)didReceiveMessage:(NSNotification *)notification {
+    if (!cachedNotications)
+    {
+        cachedNotications = [NSMutableArray array];
+    }
+    if (notification)
+    {
+        [cachedNotications addObject:notification];
+    }
 }
 
 - (id)initWithUZWebView:(UZWebView *)webView
@@ -61,12 +78,22 @@ static NSString *const mobPushModuleName = @"mobPushPlus";
 }
 
 #pragma mark - setAPNsForProduction
-
 JS_METHOD(setAPNsForProduction:(UZModuleMethodContext *)context)
 {
     NSDictionary *params = context.param;
     _isPro = [params[@"isPro"] boolValue];
     [MobPush setAPNsForProduction:_isPro];
+}
+
+
+#pragma mark - Privacy Protocol
+
+JS_METHOD(uploadPrivacyPermissionStatus:(UZModuleMethodContext *)context)
+{
+    NSDictionary *params = context.param;
+    [MobSDK uploadPrivacyPermissionStatus:[params[@"agree"] boolValue] onResult:^(BOOL success) {
+        NSLog(@"-------------->上传结果：%d",success);
+    }];
 }
 
 #pragma mark - addLocalNotification
@@ -117,12 +144,22 @@ JS_METHOD(addLocalNotification:(UZModuleMethodContext *)context)
 JS_METHOD(addpushReceiver:(UZModuleMethodContext *)context)
 {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didReceiveMessage:) name:MobPushDidReceiveMessageNotification object:nil];
-    
+    [[NSNotificationCenter defaultCenter] removeObserver:MobPushPlus.class];
     __weak typeof(self) weakSelf = self;
     self.receiverHandler = ^(MPushMessage *message) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         [strongSelf _coventMessage:message context:context];
     };
+    
+    if (cachedNotications.count)
+    {
+        for (NSNotification *notification in cachedNotications)
+        {
+            self.receiverHandler(notification.object);
+        }
+        
+        cachedNotications = nil;
+    }
 }
 
 // 收到通知回调

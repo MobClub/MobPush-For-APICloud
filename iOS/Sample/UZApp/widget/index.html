@@ -58,6 +58,13 @@
             isPro : isPro
         });
     }
+    
+    // 设置隐私协议许可 true同意，false不同意
+    function uploadPrivacyPermissionStatus (status) {
+        moduleMobPush.uploadPrivacyPermissionStatus({
+            agree : status
+        });
+    }
 
     // 添加本地通知
     function addLocal () {
@@ -294,6 +301,8 @@
             // true 生产环境，false 开发环境
             setAPNsForPro(false);
         //}
+
+        uploadPrivacyPermissionStatus(true);
 
     }
 

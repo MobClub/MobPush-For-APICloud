@@ -6,7 +6,7 @@ Description: MobPush 在 APICloud 平台的插件
 
 ## 概述
 
-当前 MobPush 版本，iOS：v1.7.2、android：v1.7.2   
+当前 MobPush 版本，iOS：v2.3.2、android：v2.3.1   
 
 ### MobPush 简介
 
@@ -118,6 +118,29 @@ Android配置第三方平台的AppKey等信息遵循APICloud的惯例是在confi
 ```js
 var pushApi = api.require('mobPushPlus');
 ```
+
+<div id="a0"></div>
+
+### **uploadPrivacyPermissionStatus**
+
+设置隐私协议许可 
+uploadPrivacyPermissionStatus (status)
+
+#### status
+
+- 类型：布尔
+- 描述：设置隐私协议许可 true同意，false不同意
+
+#### 示例代码
+
+```js
+uploadPrivacyPermissionStatus(true);
+```
+
+#### 可用性
+iOS系统，Android系统
+
+可提供的1.0.0及更高版本
 
 <div id="a1"></div>
 
@@ -682,8 +705,3 @@ iOS系统，Android系统
 ### GitHub
 
 [点击此处](https://github.com/MobClub/MobPush-For-APICloud)
-
-
-
-
-

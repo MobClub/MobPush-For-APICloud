@@ -153,7 +153,7 @@ extern NSString *const MobPushDidReceiveMessageNotification;
 + (BOOL)isPushStopped;
 
 /**
- 关闭远程推送（应用内推送和本地通知不送影响，只关闭远程推送）
+ 关闭远程推送（应用内推送和本地通知不受影响，只关闭远程推送）
  */
 + (void)stopPush;
 
@@ -161,5 +161,10 @@ extern NSString *const MobPushDidReceiveMessageNotification;
  打开远程推送
  */
 + (void)restartPush;
+
+/**
+ SDK版本
+ */
++ (NSString *)sdkVersion;
 
 @end

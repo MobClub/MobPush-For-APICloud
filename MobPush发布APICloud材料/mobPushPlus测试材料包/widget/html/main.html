@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>MobPush Module Develop</title>
+<meta charset="utf-8">
+<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+<style type="text/css">
+    html,body{
+        height: 100%
+    }
+    body{
+        background-color: #fff;
+        margin: 0;
+    }
+    #wrap{
+        height: 100%;
+        position: relative;
+    }
+    #header{
+        background-color: #5082c2;
+        height: 44px;
+        position: relative;
+    }
+    #header h1{
+        font-size: 20px;
+        height: 44px;
+        line-height: 44px;
+        margin: 0em;
+        color: #fff;
+        margin-left: 100px;
+        margin-right: 100px;
+        text-align: center;
+    }
+    #main{
+        display: block;
+    }
+    a.button{
+        display: -webkit-box;
+        -webkit-box-pack: center;
+        -webkit-box-align: center;
+        height: 36px;
+        margin: 8px;
+        background-color: rgba(240,240,240,1.0);
+        border-color: rgba(220,220,220,1.0);
+        border-width: 2px;
+        border-style: solid;
+    }
+    a.active{
+        background-color: rgba(240,240,240,0.6);
+    }
+</style>
+
+<script>
+
+    // 设置 APNs 推送证书环境， isPro：true 生产环境，false 开发环境
+    function setAPNsForPro (isPro) {
+        moduleMobPush.setAPNsForProduction({
+            isPro : isPro
+        });
+    }
+
+    // 添加本地通知
+    function addLocal () {
+
+        var localParams = null;
+        var systemType = api.systemType;
+        if (systemType == 'ios') {
+            localParams =  { // ios 参数主要有content, title, subTitle, timeStamp, badge, sound
+                "content" : "本地通知",
+                "title" : "标题",
+                "subTitle" : "副标题",
+                "timeStamp" : 1 // 1 秒后触发
+            };
+        } else { // android 参数主要有notificationId, title, content, voice, shake, light
+            localParams =  {
+                "notificationId" : 1,
+                "title":"MobPushForAPICloud",
+                "content":"本地通知测试",
+                "voice":true,
+                "shake":true,
+                "light":true
+            };
+        }
+
+        moduleMobPush.addLocalNotification({
+            localParams: localParams
+        });
+    }
+
+    // 添加监听
+    function addReceiverHandler() {
+        moduleMobPush.addpushReceiver(function(ret, err){
+            api.toast({
+                msg: "收到消息",
+                location: 'middle'
+            });
+        });
+    }
+
+    // 添加标签
+    function addTagsHandler() {
+        var tags = ["tag1", "tag2"];
+        moduleMobPush.addTags({
+            tags : tags
+        }, function(ret, err){
+            var err_code = ret.errorCode; // 0 失败， 1 成功
+            api.toast({
+                msg: err_code ? "添加标签："+ tags +"成功" : "添加标签失败",
+                location: 'middle'
+            });
+        });
+    }
+
+    // 获取标签
+    function getTagsHandler() {
+        moduleMobPush.getTags(function(ret, err){
+            var err_code = ret.errorCode; // 0 失败， 1 成功
+            var tags = ret.tags;
+            api.toast({
+                msg: err_code ? "获取标签：" + tags + "成功" : "获取标签失败",
+                location: 'middle'
+            });
+        });
+    }
+
+    // 删除指定标签
+    function deleteTagsHandler() {
+        var tags = ["tag1"];
+        moduleMobPush.deleteTags({
+             tags : tags
+        }, function(ret, err){
+            var err_code = ret.errorCode; // 0 失败， 1 成功
+            api.toast({
+                msg: err_code ? "删除标签：" + tags + "成功" : "删除标签失败",
+                location: 'middle'
+            });
+        });
+    }
+
+    // 清空所有标签
+    function cleanTagsHandler() {
+        moduleMobPush.cleanAllTags(function(ret, err){
+            var err_code = ret.errorCode; // 0 失败， 1 成功
+            api.toast({
+              msg: err_code ? "清空所有标签成功" : "清空所有标签失败",
+              location: 'middle'
+            });
+        });
+    }
+
+    // 获取 RegistrationID
+    function getRegIdHandler() {
+        moduleMobPush.getRegistrationID(function(ret, err){
+            var regId = ret.regId; // reg有值成功，否则失败
+            api.toast({
+                msg: regId ? "获取regId："+ regId +"成功" : "获取regId失败",
+                location: 'middle'
+            });
+        });
+    }
+
+    // 设置别名
+    function setAliasHandler() {
+        var alias = "小王";
+        moduleMobPush.setAlias({
+            alias : alias
+        },function(ret, err){
+            var err_code = ret.errorCode; // 0 失败， 1 成功
+            api.toast({
+              msg: err_code ? "设置别名："+ alias +"成功" : "设置别名失败",
+              location: 'middle'
+            });
+        });
+    }
+
+    // 删除别名
+    function deleteAliasHandler() {
+        moduleMobPush.deleteAlias(function(ret, err){
+            var err_code = ret.errorCode; // 0 失败， 1 成功
+            api.toast({
+                msg: err_code ? "删除别名成功" : "删除别名失败",
+                location: 'middle'
+            });
+        });
+    }
+
+    // 获取别名
+    function getAliasHandler() {
+        moduleMobPush.getAlias(function(ret, err){
+            var err_code = ret.errorCode; // 0 失败， 1 成功
+            var alias = ret.alias;
+            api.toast({
+                msg: err_code ? "获取别名：" + alias + "成功" : "获取别名失败",
+                location: 'middle'
+            });
+        });
+    }
+
+    // 绑定手机号
+    function bindPhoneNumHandler() {
+        var phoneNum = "110";
+        moduleMobPush.bindPhoneNum({
+            phoneNum : phoneNum
+        },function(ret, err){
+            var err_code = ret.errorCode; // 0 失败， 1 成功
+            api.toast({
+                msg: err_code ? "绑定手机号："+ phoneNum + "成功" : "绑定手机号失败",
+                location: 'middle'
+            });
+        });
+    }
+
+    // 推送一条通知
+    function pushNotificationHandler() {
+        moduleMobPush.sendMessage({
+            msgType:  1, //消息类型: 1 apns, 2 自定义消息， 3 定时 apns
+            content: '测试推送消息', // 模拟发送内容
+            space:  0, // 定时消息时间（仅对定时消息有效，单位分钟，默认值为1）
+            extras: { } // 额外字段
+        },function(ret, err){
+            // 消息示例：{"pushResult":true}
+            alert(JSON.stringify(ret));
+        });
+    }
+
+    // 推送透传(自定义)消息
+    function pushCustomMessageHandler() {
+        moduleMobPush.sendMessage({
+            msgType:  2, //消息类型: 1 apns, 2 自定义消息， 3 定时 apns
+            content: '测试透传(自定义)消息', // 模拟发送内容
+            space:  0, // 定时消息时间（仅对定时消息有效，单位分钟，默认值为1）
+            extras: {"name":"xiaoxin"} // 额外字段
+        },function(ret, err){
+            alert(JSON.stringify(ret));
+        });
+    }
+
+    // 推送定时(30s)通知
+    function pushTimeNotificationHandler() {
+        moduleMobPush.sendMessage({
+            msgType:  3, //消息类型: 1 apns, 2 自定义消息， 3 定时 apns
+            content: '推送定时(30s)通知', // 模拟发送内容
+            space:  30, // 定时消息时间（仅对定时消息有效，单位分钟，默认值为1）
+            extras: {} // 额外字段
+        },function(ret, err){
+            // 消息示例：{"pushResult":true}
+            alert(JSON.stringify(ret));
+        });
+    }
+
+    function getPrivacyPolicyUrl(){
+            // param中的key命名不能改变,{1:URL,2:富文本}
+            var param = {type:1};
+            mobcommonlib.getPrivacyPolicyAsync(param, function(ret, err){
+                if (err !== null && err !== undefined && err !== '') {
+                    // 错误消息示例：{"msg":"MobTech policy not granted.","code":600}
+                    alert(eTitle + JSON.stringify(err));
+                } else {
+                    // 正常消息示例：{"content":"http://www.mob.com/privacy/policy/index.html", "title":"服务协议", "ppVersion":1, "timestamp":23124353131}
+                    alert(sTitle + JSON.stringify(ret));
+                }
+            });
+        }
+
+        function getPrivacyPolicyTxt(){
+            // param中的key命名不能改变,{1:URL,2:富文本}
+            var param = {type:2};
+            mobcommonlib.getPrivacyPolicyAsync(param, function(ret, err){
+                if (err !== null && err !== undefined && err !== '') {
+                    // 错误消息示例：{"msg":"MobTech policy not granted.","code":600}
+                    alert(eTitle + JSON.stringify(err));
+                } else {
+                    // 正常消息示例：{"content":"http://www.mob.com/privacy/policy/index.html", "title":"服务协议", "ppVersion":1, "timestamp":23124353131}
+                    alert(sTitle + JSON.stringify(ret));
+                }
+            });
+        }
+
+        function openPolicyDialog() {
+            var confirm = window.confirm("是否接受了隐私协议？");
+            var rst;
+            if (confirm) {
+                console.log('点击了是按钮，关闭弹窗');
+                rst = true;
+            } else {
+                console.log('点击了否按钮');
+                rst = false;
+            }
+
+        // param中的key命名不能改变,{true:同意,false:拒绝}
+            var param = {granted:rst};
+                mobcommonlib.submitPolicyGrantResult(param, function(ret, err){
+                    if (err !== null && err !== undefined && err !== '') {
+                        // 错误消息示例：{"msg":"Service not found.","code":404}
+                        alert(eTitle + JSON.stringify(err));
+                    } else {
+                        // 正常消息示例：{"result":"success"}
+                        alert(sTitle + JSON.stringify(ret));
+                    }
+                });
+        }
+
+        function setAllowDialog() {
+            var confirm = window.confirm("是否允许二次弹框？");
+            if (confirm) {
+                console.log('点击了是按钮，关闭弹窗');
+            // param中的key命名不能改变,{true:同意,false:拒绝}
+            var param = {allowDialog:true};
+            mobcommonlib.setAllowDialog(param);
+            } else {
+                console.log('点击了否按钮');
+                // param中的key命名不能改变,{true:同意,false:拒绝}
+            var param = {allowDialog:false};
+            mobcommonlib.setAllowDialog(param);
+            }
+        }
+
+    function setPolicyUi() {
+        // param中的key命名不能改变,{bgColor:弹框背景色名称,acceptColor:同意按钮背景色名称,rejectColor:拒绝按钮背景色名称}
+        // 目前支持颜色值有：white,black,blue,red,holo_green_light,holo_gray_light,holo_orange_light,holo_purple
+        var param = {bgColor:"white", acceptColor:"holo_orange_light", rejectColor:"holo_green_light"};
+        mobcommonlib.setPolicyUi(param);
+        }
+
+</script>
+
+</head>
+<body>
+    <div id="wrap">
+        <header id="header">
+            <h1 id="title">MobPush Demo</h1>
+        </header>
+        <div id="main">
+            <a class="button" tapmode="active" onclick="addLocal()">添加本地通知</a>
+            <a class="button" tapmode="active" onclick="addTagsHandler()">添加标签</a>
+            <a class="button" tapmode="active" onclick="getTagsHandler()">获取标签</a>
+            <a class="button" tapmode="active" onclick="deleteTagsHandler()">删除指定标签</a>
+            <a class="button" tapmode="active" onclick="cleanTagsHandler()">清空所有标签</a>
+            <a class="button" tapmode="active" onclick="getRegIdHandler()">获取 RegistrationID</a>
+            <a class="button" tapmode="active" onclick="setAliasHandler()">设置别名</a>
+            <a class="button" tapmode="active" onclick="deleteAliasHandler()">删除别名</a>
+            <a class="button" tapmode="active" onclick="getAliasHandler()">获取别名</a>
+            <a class="button" tapmode="active" onclick="bindPhoneNumHandler()">绑定手机号</a>
+            <a class="button" tapmode="active" onclick="pushNotificationHandler()">推送一条通知</a>
+            <a class="button" tapmode="active" onclick="pushCustomMessageHandler()">推送透传(自定义)消息</a>
+            <a class="button" tapmode="active" onclick="pushTimeNotificationHandler()">推送定时(30s)通知</a>
+            <a class='itemtitle'>隐私协议接口</a>
+            <a class="button" tapmode="active" onclick="getPrivacyPolicyUrl()" >查询隐私协议（URL)</a>
+            <a class="button" tapmode="active" onclick="getPrivacyPolicyTxt()" >查询隐私协议（富文本)</a>
+            <a class="button" tapmode="active" onclick="openPolicyDialog()" >模拟回传隐私协议授权结果</a>
+            <lable>注意：二次弹框相关设置需在调用业务接口前调用，否则不生效</lable>
+            <a class="button" tapmode="active" onclick="setAllowDialog()" >设置是否允许二次弹框</a>
+            <a class="button" tapmode="active" onclick="setPolicyUi()" >自定义二次弹框UI</a>
+        </div>
+    </div>
+</body>
+<script>
+
+    var moduleMobPush = null;
+    var mobcommonlib = null;
+
+
+    function apiready() {
+        var header = document.getElementById('header');
+        header.style.paddingTop = api.safeArea.top + 'px';
+
+        api.removeLaunchView();
+
+        moduleMobPush = api.require('mobPushPlus');
+        mobcommonlib = api.require('mobcommonlib');
+
+        addReceiverHandler();
+
+        var systemType = api.systemType;
+
+        // iOS 下设置推送环境
+        if (systemType == 'ios') {
+            // true 生产环境，false 开发环境
+            setAPNsForPro(false);
+        }
+
+    }
+
+</script>
+</html>

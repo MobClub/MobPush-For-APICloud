@@ -25,8 +25,8 @@ DerivedData
 .idea/
 *.hmap
 *.xccheckout
-*.xcworkspace
-!default.xcworkspace
+#*.xcworkspace
+#!default.xcworkspace
 
 #CocoaPods
 Pods
@@ -52,7 +52,7 @@ xcuserdata/
 
 ## Obj-C/Swift specific
 *.hmap
-*.ipa
+#*.ipa
 *.dSYM.zip
 *.dSYM
 
