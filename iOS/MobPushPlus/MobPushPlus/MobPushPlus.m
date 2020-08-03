@@ -96,6 +96,18 @@ JS_METHOD(uploadPrivacyPermissionStatus:(UZModuleMethodContext *)context)
     }];
 }
 
+
+JS_METHOD(getPrivacyPolicy:(UZModuleMethodContext *)context)
+{
+    NSDictionary *params = context.param;
+    NSString *type = params[@"type"]?[NSString stringWithFormat:@"%@", params[@"type"]]:@"";
+    [MobSDK getPrivacyPolicy:type language:params[@"language"] compeletion:^(NSDictionary * _Nullable data, NSError * _Nullable error) {
+        NSMutableDictionary *responseDict = [self _handlerError:error];
+        [responseDict addEntriesFromDictionary:data];
+        [context callbackWithRet:responseDict err:nil delete:YES];
+    }];
+}
+
 #pragma mark - addLocalNotification
 
 JS_METHOD(addLocalNotification:(UZModuleMethodContext *)context)
@@ -107,36 +119,70 @@ JS_METHOD(addLocalNotification:(UZModuleMethodContext *)context)
         localParams = params[@"localParams"];
     }
     
-    MPushMessage *message = [[MPushMessage alloc] init];
-    message.messageType = MPushMessageTypeLocal;
-    MPushNotification *noti = [[MPushNotification alloc] init];
-    noti.body = localParams[@"content"];
-    noti.title = localParams[@"title"];
-    noti.subTitle = localParams[@"subTitle"];
-    noti.sound = localParams[@"sound"];
+//    MPushMessage *message = [[MPushMessage alloc] init];
+//    message.messageType = MPushMessageTypeLocal;
+    
+    MPushNotificationRequest *request = [MPushNotificationRequest new];
+    NSString *identifier = nil;
+    if (localParams[@"identifier"] && ![localParams[@"identifier"] isKindOfClass:[NSNull class]])
+    {
+        identifier = localParams[@"identifier"];
+    }
+    request.requestIdentifier = identifier;
+    
+    MPushNotification *content = [[MPushNotification alloc] init];
+    content.body = localParams[@"content"];
+    content.title = localParams[@"title"];
+    content.subTitle = localParams[@"subTitle"];
+    content.sound = localParams[@"sound"];
     if (localParams[@"badge"])
     {
-        noti.badge = [localParams[@"badge"] integerValue];
+        content.badge = [localParams[@"badge"] integerValue];
     }
     else
     {
-        noti.badge = ([UIApplication sharedApplication].applicationIconBadgeNumber < 0 ? 0 : [UIApplication sharedApplication].applicationIconBadgeNumber) + 1;
+        content.badge = ([UIApplication sharedApplication].applicationIconBadgeNumber < 0 ? 0 : [UIApplication sharedApplication].applicationIconBadgeNumber) + 1;
     }
     
-    message.notification = noti;
+    if ([localParams[@"extra"] isKindOfClass:[NSDictionary class]])
+    {
+        content.userInfo = localParams[@"extra"];
+    }
+    if ([localParams[@"userInfo"] isKindOfClass:[NSDictionary class]])
+    {
+        content.userInfo = localParams[@"userInfo"];
+    }
+    
+    request.content = content;
+    
+    
+    // 推送通知触发条件
+    MPushNotificationTrigger *trigger = [MPushNotificationTrigger new];
     
     long timeStamp = [localParams[@"timeStamp"] longValue];
     
-    if (timeStamp <= 0)
+    if (timeStamp > 0)
     {
-        message.isInstantMessage = YES;
+        // 设置几分钟后发起本地推送
+        NSDate *currentDate = [NSDate dateWithTimeIntervalSinceNow:0];
+        NSTimeInterval nowtime = [currentDate timeIntervalSince1970] * 1000;
+        NSTimeInterval tasktimeInterval = nowtime + timeStamp*1000;
+        if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 10.0)
+        {
+            trigger.timeInterval = timeStamp;
+        }
+        else
+        {
+            trigger.fireDate = [NSDate dateWithTimeIntervalSince1970:tasktimeInterval];
+        }
     }
-    else
-    {
-        NSTimeInterval timeInterval = [[NSDate date] timeIntervalSince1970];
-        message.taskDate = (timeInterval + (NSTimeInterval)timeStamp) * 1000;
-    }
-    [MobPush addLocalNotification:message];
+    
+    request.trigger = trigger;
+    
+    [MobPush addLocalNotification:request result:^(id result, NSError *error) {
+        NSMutableDictionary *responseDict = [self _handlerError:error];
+        [context callbackWithRet:responseDict err:nil delete:YES];
+    }];
 }
 
 #pragma mark - addpushReceiver
@@ -283,17 +329,36 @@ JS_METHOD(sendMessage:(UZModuleMethodContext *)context)
     NSString *content = params[@"content"];
     NSNumber *space = params[@"space"];
     NSDictionary *extras = params[@"extras"];
+    NSString *sound = params[@"sound"]?:@"default";
+    NSString *coverId = params[@"coverId"];
     [MobPush sendMessageWithMessageType:msgType
                                 content:content
                                   space:space
+                                  sound:sound
                 isProductionEnvironment:_isPro
                                  extras:extras
                              linkScheme:nil
                                linkData:nil
-                                 result:^(NSError *error) {
-                                     NSMutableDictionary *responseDict = [self _handlerError:error];
-                                     [context callbackWithRet:responseDict err:nil delete:YES];
-                                 }];
+                                coverId:coverId
+                                 result:^(NSString *workId, NSError *error) {
+        NSMutableDictionary *responseDict = [self _handlerError:error];
+        if (workId)
+        {
+            responseDict[@"workId"] = workId;
+        }
+        [context callbackWithRet:responseDict err:nil delete:YES];
+    }];
+//    [MobPush sendMessageWithMessageType:msgType
+//                                content:content
+//                                  space:space
+//                isProductionEnvironment:_isPro
+//                                 extras:extras
+//                             linkScheme:nil
+//                               linkData:nil
+//                                 result:^(NSError *error) {
+//                                     NSMutableDictionary *responseDict = [self _handlerError:error];
+//                                     [context callbackWithRet:responseDict err:nil delete:YES];
+//                                 }];
 }
 
 #pragma mark - Privates
@@ -316,6 +381,10 @@ JS_METHOD(sendMessage:(UZModuleMethodContext *)context)
 {
     NSMutableDictionary *resultDict = [NSMutableDictionary dictionary];
     NSMutableDictionary *reslut = [NSMutableDictionary dictionary];
+    if (![message isKindOfClass:[MPushMessage class]])
+    {
+        return;
+    }
     
     switch (message.messageType)
     {
@@ -323,14 +392,14 @@ JS_METHOD(sendMessage:(UZModuleMethodContext *)context)
         {// 自定义消息
             [resultDict setObject:@0 forKey:@"action"];
             
-            if (message.extraInfomation)
+            if (message.notification.userInfo)
             {
-                [reslut setObject:message.extraInfomation forKey:@"extra"];
+                [reslut setObject:message.notification.userInfo forKey:@"extra"];
             }
             
-            if (message.content)
+            if (message.notification.body)
             {
-                [reslut setObject:message.content forKey:@"content"];
+                [reslut setObject:message.notification.body forKey:@"content"];
             }
             
             if (message.messageID)
@@ -338,217 +407,65 @@ JS_METHOD(sendMessage:(UZModuleMethodContext *)context)
                 [reslut setObject:message.messageID forKey:@"messageId"];
             }
             
-            if (message.currentServerTimestamp)
-            {
-                [reslut setObject:@(message.currentServerTimestamp) forKey:@"timeStamp"];
-            }
+            [reslut addEntriesFromDictionary:message.notification.convertDictionary];
         }
             break;
         case MPushMessageTypeAPNs:
         {// APNs 回调
-            if (message.msgInfo)
-            {
-                NSDictionary *aps = message.msgInfo[@"aps"];
-                if ([aps isKindOfClass:[NSDictionary class]])
-                {
-                    NSDictionary *alert = aps[@"alert"];
-                    if ([alert isKindOfClass:[NSDictionary class]])
-                    {
-                        NSString *body = alert[@"body"];
-                        if (body)
-                        {
-                            [reslut setObject:body forKey:@"content"];
-                        }
-                        
-                        NSString *subtitle = alert[@"subtitle"];
-                        if (subtitle)
-                        {
-                            [reslut setObject:subtitle forKey:@"subtitle"];
-                        }
-                        
-                        NSString *title = alert[@"title"];
-                        if (title)
-                        {
-                            [reslut setObject:title forKey:@"title"];
-                        }
-                    }
-                    
-                    NSString *sound = aps[@"sound"];
-                    if (sound)
-                    {
-                        [reslut setObject:sound forKey:@"sound"];
-                    }
-                    
-                    NSInteger badge = [aps[@"badge"] integerValue];
-                    if (badge)
-                    {
-                        [reslut setObject:@(badge) forKey:@"badge"];
-                    }
-                    
-                }
-            }
-            
-            NSString *messageId = message.msgInfo[@"mobpushMessageId"];
-            if (messageId)
-            {
-                [reslut setObject:messageId forKey:@"messageId"];
-            }
-            
-            NSMutableDictionary *extra = [NSMutableDictionary dictionary];
-            [message.msgInfo enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-                
-                if (![key isEqualToString:@"aps"] && ![key isEqualToString:@"mobpushMessageId"])
-                {
-                    [extra setObject:obj forKey:key];
-                }
-                
-            }];
-            
-            if (extra.count)
-            {
-                [reslut setObject:extra forKey:@"extra"];
-            }
-            
             [resultDict setObject:@1 forKey:@"action"];
+            
+            if (message.notification.userInfo)
+            {
+                [reslut setObject:message.notification.userInfo forKey:@"extra"];
+            }
+            if (message.notification.body)
+            {
+                [reslut setObject:message.notification.body forKey:@"content"];
+            }
+            if (message.messageID)
+            {
+                [reslut setObject:message.messageID forKey:@"messageId"];
+            }
+            [reslut addEntriesFromDictionary:message.notification.convertDictionary];
         }
             break;
         case MPushMessageTypeLocal:
         { // 本地通知回调
-            NSString *body = message.notification.body;
-            NSString *title = message.notification.title;
-            NSString *subtitle = message.notification.subTitle;
-            NSInteger badge = message.notification.badge;
-            NSString *sound = message.notification.sound;
-            if (body)
-            {
-                [reslut setObject:body forKey:@"content"];
-            }
-            
-            if (title)
-            {
-                [reslut setObject:title forKey:@"title"];
-            }
-            
-            if (subtitle)
-            {
-                [reslut setObject:subtitle forKey:@"subtitle"];
-            }
-            
-            if (badge)
-            {
-                [reslut setObject:@(badge) forKey:@"badge"];
-            }
-            
-            if (sound)
-            {
-                [reslut setObject:sound forKey:@"sound"];
-            }
-            
             [resultDict setObject:@1 forKey:@"action"];
+            
+            if (message.notification.userInfo)
+            {
+                [reslut setObject:message.notification.userInfo forKey:@"extra"];
+            }
+            if (message.notification.body)
+            {
+                [reslut setObject:message.notification.body forKey:@"content"];
+            }
+            if (message.messageID)
+            {
+                [reslut setObject:message.messageID forKey:@"messageId"];
+            }
+            [reslut addEntriesFromDictionary:message.notification.convertDictionary];
         }
             break;
             
         case MPushMessageTypeClicked:
         {
-            if (message.msgInfo)
-            {
-                NSDictionary *aps = message.msgInfo[@"aps"];
-                if ([aps isKindOfClass:[NSDictionary class]])
-                {
-                    NSDictionary *alert = aps[@"alert"];
-                    if ([alert isKindOfClass:[NSDictionary class]])
-                    {
-                        NSString *body = alert[@"body"];
-                        if (body)
-                        {
-                            [reslut setObject:body forKey:@"content"];
-                        }
-                        
-                        NSString *subtitle = alert[@"subtitle"];
-                        if (subtitle)
-                        {
-                            [reslut setObject:subtitle forKey:@"subtitle"];
-                        }
-                        
-                        NSString *title = alert[@"title"];
-                        if (title)
-                        {
-                            [reslut setObject:title forKey:@"title"];
-                        }
-                    }
-                    
-                    NSString *sound = aps[@"sound"];
-                    if (sound)
-                    {
-                        [reslut setObject:sound forKey:@"sound"];
-                    }
-                    
-                    NSInteger badge = [aps[@"badge"] integerValue];
-                    if (badge)
-                    {
-                        [reslut setObject:@(badge) forKey:@"badge"];
-                    }
-                    
-                }
-                
-                NSString *messageId = message.msgInfo[@"mobpushMessageId"];
-                if (messageId)
-                {
-                    [reslut setObject:messageId forKey:@"messageId"];
-                }
-                
-                NSMutableDictionary *extra = [NSMutableDictionary dictionary];
-                [message.msgInfo enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-                    
-                    if (![key isEqualToString:@"aps"] && ![key isEqualToString:@"mobpushMessageId"])
-                    {
-                        [extra setObject:obj forKey:key];
-                    }
-                    
-                }];
-                
-                if (extra.count)
-                {
-                    [reslut setObject:extra forKey:@"extra"];
-                }
-                
-                [resultDict setObject:@2 forKey:@"action"];
-            }
-            else
-            {
-                NSString *body = message.notification.body;
-                NSString *title = message.notification.title;
-                NSString *subtitle = message.notification.subTitle;
-                NSInteger badge = message.notification.badge;
-                NSString *sound = message.notification.sound;
-                if (body)
-                {
-                    [reslut setObject:body forKey:@"content"];
-                }
-                
-                if (title)
-                {
-                    [reslut setObject:title forKey:@"title"];
-                }
-                
-                if (subtitle)
-                {
-                    [reslut setObject:subtitle forKey:@"subtitle"];
-                }
-                
-                if (badge)
-                {
-                    [reslut setObject:@(badge) forKey:@"badge"];
-                }
-                
-                if (sound)
-                {
-                    [reslut setObject:sound forKey:@"sound"];
-                }
-                
-                [resultDict setObject:@2 forKey:@"action"];
-            }
+            [resultDict setObject:@2 forKey:@"action"];
             
+            if (message.notification.userInfo)
+            {
+                [reslut setObject:message.notification.userInfo forKey:@"extra"];
+            }
+            if (message.notification.body)
+            {
+                [reslut setObject:message.notification.body forKey:@"content"];
+            }
+            if (message.messageID)
+            {
+                [reslut setObject:message.messageID forKey:@"messageId"];
+            }
+            [reslut addEntriesFromDictionary:message.notification.convertDictionary];
         }
             break;
             

@@ -22,10 +22,10 @@
         position: relative;
     }
     #header h1{
-        font-size: 20px; 
-        height: 44px; 
-        line-height: 44px; 
-        margin: 0em; 
+        font-size: 20px;
+        height: 44px;
+        line-height: 44px;
+        margin: 0em;
         color: #fff;
         margin-left: 100px;
         margin-right: 100px;
@@ -58,8 +58,8 @@
             isPro : isPro
         });
     }
-    
-    // 设置隐私协议许可 true同意，false不同意
+
+    // iOS 设置隐私协议许可 true同意，false不同意
     function uploadPrivacyPermissionStatus (status) {
         moduleMobPush.uploadPrivacyPermissionStatus({
             agree : status
@@ -68,7 +68,7 @@
 
     // 添加本地通知
     function addLocal () {
-        
+
         var localParams = null;
         var systemType = api.systemType;
         if (systemType == 'ios') {
@@ -88,7 +88,7 @@
                 "light":true
             };
         }
-        
+
         moduleMobPush.addLocalNotification({
             localParams: localParams
         });
@@ -223,10 +223,12 @@
             msgType:  1, //消息类型: 1 apns, 2 自定义消息， 3 定时 apns
             content: '测试推送消息', // 模拟发送内容
             space:  0, // 定时消息时间（仅对定时消息有效，单位分钟，默认值为1）
-            extras: { } // 额外字段
+            extras: { }, // 额外字段
+            //sound: '', // mainBundle里面的铃声文件名称
+            //coverId: '', // 需要覆盖消息的workid
         },function(ret, err){
             // 消息示例：{"pushResult":true}
-            // alert(JSON.stringify(ret));
+            alert(JSON.stringify(ret));
         });
     }
 
@@ -236,7 +238,9 @@
             msgType:  2, //消息类型: 1 apns, 2 自定义消息， 3 定时 apns
             content: '测试透传(自定义)消息', // 模拟发送内容
             space:  0, // 定时消息时间（仅对定时消息有效，单位分钟，默认值为1）
-            extras: {"name":"xiaoxin"} // 额外字段
+            extras: {"name":"xiaoxin"}, // 额外字段
+            //sound: '', // mainBundle里面的铃声文件名称
+            //coverId: '', // 需要覆盖消息的workid
         },function(ret, err){
             alert(JSON.stringify(ret));
         });
@@ -248,12 +252,108 @@
             msgType:  3, //消息类型: 1 apns, 2 自定义消息， 3 定时 apns
             content: '推送定时(30s)通知', // 模拟发送内容
             space:  30, // 定时消息时间（仅对定时消息有效，单位分钟，默认值为1）
-            extras: {} // 额外字段
+            extras: {}, // 额外字段
+            //sound: '', // mainBundle里面的铃声文件名称
+            //coverId: '', // 需要覆盖消息的workid
         },function(ret, err){
             // 消息示例：{"pushResult":true}
             alert(JSON.stringify(ret));
         });
     }
+
+    function getPrivacyPolicyUrl(){
+        // param中的key命名不能改变,{1:URL,2:富文本}
+        var param = {type:1};
+        var systemType = api.systemType;
+        if (systemType == 'ios')
+        {
+            moduleMobPush.getPrivacyPolicy(param, function(ret, err) {
+                var err_code = ret.errorCode; // 0 失败， 1 成功
+            });
+        }
+        else
+        {
+            mobcommonlib.getPrivacyPolicyAsync(param, function(ret, err){
+                if (err !== null && err !== undefined && err !== '') {
+                    // 错误消息示例：{"msg":"MobTech policy not granted.","code":600}
+                    alert(eTitle + JSON.stringify(err));
+                } else {
+                    // 正常消息示例：{"content":"http://www.mob.com/privacy/policy/index.html", "title":"服务协议", "ppVersion":1, "timestamp":23124353131}
+                    alert(sTitle + JSON.stringify(ret));
+                }
+            });
+        }
+    }
+
+    function getPrivacyPolicyTxt(){
+        // param中的key命名不能改变,{1:URL,2:富文本}
+        var param = {type:2};
+        var systemType = api.systemType;
+        if (systemType == 'ios')
+        {
+            moduleMobPush.getPrivacyPolicy(param, function(ret, err) {
+                var err_code = ret.errorCode; // 0 失败， 1 成功
+            });
+        }
+        else
+        {
+            mobcommonlib.getPrivacyPolicyAsync(param, function(ret, err){
+                if (err !== null && err !== undefined && err !== '') {
+                    // 错误消息示例：{"msg":"MobTech policy not granted.","code":600}
+                    alert(eTitle + JSON.stringify(err));
+                } else {
+                    // 正常消息示例：{"content":"http://www.mob.com/privacy/policy/index.html", "title":"服务协议", "ppVersion":1, "timestamp":23124353131}
+                    alert(sTitle + JSON.stringify(ret));
+                }
+            });
+        }
+    }
+
+        function openPolicyDialog() {
+            var confirm = window.confirm("是否接受了隐私协议？");
+            var rst;
+            if (confirm) {
+                console.log('点击了是按钮，关闭弹窗');
+                rst = true;
+            } else {
+                console.log('点击了否按钮');
+                rst = false;
+            }
+
+        // param中的key命名不能改变,{true:同意,false:拒绝}
+            var param = {granted:rst};
+                mobcommonlib.submitPolicyGrantResult(param, function(ret, err){
+                    if (err !== null && err !== undefined && err !== '') {
+                        // 错误消息示例：{"msg":"Service not found.","code":404}
+                        alert(eTitle + JSON.stringify(err));
+                    } else {
+                        // 正常消息示例：{"result":"success"}
+                        alert(sTitle + JSON.stringify(ret));
+                    }
+                });
+        }
+
+        function setAllowDialog() {
+            var confirm = window.confirm("是否允许二次弹框？");
+            if (confirm) {
+                console.log('点击了是按钮，关闭弹窗');
+            // param中的key命名不能改变,{true:同意,false:拒绝}
+            var param = {allowDialog:true};
+            mobcommonlib.setAllowDialog(param);
+            } else {
+                console.log('点击了否按钮');
+                // param中的key命名不能改变,{true:同意,false:拒绝}
+            var param = {allowDialog:false};
+            mobcommonlib.setAllowDialog(param);
+            }
+        }
+
+    function setPolicyUi() {
+        // param中的key命名不能改变,{bgColor:弹框背景色名称,acceptColor:同意按钮背景色名称,rejectColor:拒绝按钮背景色名称}
+        // 目前支持颜色值有：white,black,blue,red,holo_green_light,holo_gray_light,holo_orange_light,holo_purple
+        var param = {bgColor:"white", acceptColor:"holo_orange_light", rejectColor:"holo_green_light"};
+        mobcommonlib.setPolicyUi(param);
+        }
 
 </script>
 
@@ -277,32 +377,42 @@
             <a class="button" tapmode="active" onclick="pushNotificationHandler()">推送一条通知</a>
             <a class="button" tapmode="active" onclick="pushCustomMessageHandler()">推送透传(自定义)消息</a>
             <a class="button" tapmode="active" onclick="pushTimeNotificationHandler()">推送定时(30s)通知</a>
+            <a class='itemtitle'>隐私协议接口</a>
+            <a class="button" tapmode="active" onclick="getPrivacyPolicyUrl()" >查询隐私协议（URL)</a>
+            <a class="button" tapmode="active" onclick="getPrivacyPolicyTxt()" >查询隐私协议（富文本)</a>
         </div>
     </div>
 </body>
 <script>
 
     var moduleMobPush = null;
+    var mobcommonlib = null;
+
 
     function apiready() {
         var header = document.getElementById('header');
         header.style.paddingTop = api.safeArea.top + 'px';
-        
+
         api.removeLaunchView();
-        
+
         moduleMobPush = api.require('mobPushPlus');
+
 
         addReceiverHandler();
 
         var systemType = api.systemType;
-        
+
         // iOS 下设置推送环境
-        //if (systemType == 'ios') {
+        if (systemType == 'ios') {
             // true 生产环境，false 开发环境
             setAPNsForPro(false);
-        //}
-
-        uploadPrivacyPermissionStatus(true);
+            //上传隐私协议
+            uploadPrivacyPermissionStatus(true)
+        }
+        else
+        {
+            mobcommonlib = api.require('mobcommonlib');
+        }
 
     }
 

@@ -5,7 +5,7 @@ Description: MobPush 在 APICloud 平台的插件
 
 ## 概述
 
-当前 MobPush 版本，iOS：v2.2.2、android：v2.2.2   
+当前 MobPush 版本，iOS：v3.0.1、android：v3.2.2      
 
 ### MobPush 简介
 

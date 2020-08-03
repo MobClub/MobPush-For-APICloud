@@ -248,80 +248,6 @@
         });
     }
 
-    function getPrivacyPolicyUrl(){
-            // param中的key命名不能改变,{1:URL,2:富文本}
-            var param = {type:1};
-            mobcommonlib.getPrivacyPolicyAsync(param, function(ret, err){
-                if (err !== null && err !== undefined && err !== '') {
-                    // 错误消息示例：{"msg":"MobTech policy not granted.","code":600}
-                    alert(eTitle + JSON.stringify(err));
-                } else {
-                    // 正常消息示例：{"content":"http://www.mob.com/privacy/policy/index.html", "title":"服务协议", "ppVersion":1, "timestamp":23124353131}
-                    alert(sTitle + JSON.stringify(ret));
-                }
-            });
-        }
-
-        function getPrivacyPolicyTxt(){
-            // param中的key命名不能改变,{1:URL,2:富文本}
-            var param = {type:2};
-            mobcommonlib.getPrivacyPolicyAsync(param, function(ret, err){
-                if (err !== null && err !== undefined && err !== '') {
-                    // 错误消息示例：{"msg":"MobTech policy not granted.","code":600}
-                    alert(eTitle + JSON.stringify(err));
-                } else {
-                    // 正常消息示例：{"content":"http://www.mob.com/privacy/policy/index.html", "title":"服务协议", "ppVersion":1, "timestamp":23124353131}
-                    alert(sTitle + JSON.stringify(ret));
-                }
-            });
-        }
-
-        function openPolicyDialog() {
-            var confirm = window.confirm("是否接受了隐私协议？");
-            var rst;
-            if (confirm) {
-                console.log('点击了是按钮，关闭弹窗');
-                rst = true;
-            } else {
-                console.log('点击了否按钮');
-                rst = false;
-            }
-
-        // param中的key命名不能改变,{true:同意,false:拒绝}
-            var param = {granted:rst};
-                mobcommonlib.submitPolicyGrantResult(param, function(ret, err){
-                    if (err !== null && err !== undefined && err !== '') {
-                        // 错误消息示例：{"msg":"Service not found.","code":404}
-                        alert(eTitle + JSON.stringify(err));
-                    } else {
-                        // 正常消息示例：{"result":"success"}
-                        alert(sTitle + JSON.stringify(ret));
-                    }
-                });
-        }
-
-        function setAllowDialog() {
-            var confirm = window.confirm("是否允许二次弹框？");
-            if (confirm) {
-                console.log('点击了是按钮，关闭弹窗');
-            // param中的key命名不能改变,{true:同意,false:拒绝}
-            var param = {allowDialog:true};
-            mobcommonlib.setAllowDialog(param);
-            } else {
-                console.log('点击了否按钮');
-                // param中的key命名不能改变,{true:同意,false:拒绝}
-            var param = {allowDialog:false};
-            mobcommonlib.setAllowDialog(param);
-            }
-        }
-
-    function setPolicyUi() {
-        // param中的key命名不能改变,{bgColor:弹框背景色名称,acceptColor:同意按钮背景色名称,rejectColor:拒绝按钮背景色名称}
-        // 目前支持颜色值有：white,black,blue,red,holo_green_light,holo_gray_light,holo_orange_light,holo_purple
-        var param = {bgColor:"white", acceptColor:"holo_orange_light", rejectColor:"holo_green_light"};
-        mobcommonlib.setPolicyUi(param);
-        }
-
 </script>
 
 </head>
@@ -344,13 +270,6 @@
             <a class="button" tapmode="active" onclick="pushNotificationHandler()">推送一条通知</a>
             <a class="button" tapmode="active" onclick="pushCustomMessageHandler()">推送透传(自定义)消息</a>
             <a class="button" tapmode="active" onclick="pushTimeNotificationHandler()">推送定时(30s)通知</a>
-            <a class='itemtitle'>隐私协议接口</a>
-            <a class="button" tapmode="active" onclick="getPrivacyPolicyUrl()" >查询隐私协议（URL)</a>
-            <a class="button" tapmode="active" onclick="getPrivacyPolicyTxt()" >查询隐私协议（富文本)</a>
-            <a class="button" tapmode="active" onclick="openPolicyDialog()" >模拟回传隐私协议授权结果</a>
-            <lable>注意：二次弹框相关设置需在调用业务接口前调用，否则不生效</lable>
-            <a class="button" tapmode="active" onclick="setAllowDialog()" >设置是否允许二次弹框</a>
-            <a class="button" tapmode="active" onclick="setPolicyUi()" >自定义二次弹框UI</a>
         </div>
     </div>
 </body>
